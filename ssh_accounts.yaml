@@ -1,0 +1,9 @@
+- hostname: "server1.example.com"
+  username: "admin"
+  password: "admin123"
+  port: 22
+
+- hostname: "backup.example.com"
+  username: "root"
+  password: "secureP@ssw0rd"
+  port: 2222
