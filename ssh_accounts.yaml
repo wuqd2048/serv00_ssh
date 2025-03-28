@@ -1,4 +1,4 @@
-- hostname: "server1.example.com"
+- hostname: "web1.serv00.com"
   username: "admin"
   password: "admin123"
   port: 22

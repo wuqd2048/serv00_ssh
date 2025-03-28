@@ -1,7 +1,8 @@
-import os  # 新增模块导入
+import os
 import paramiko
 import yaml
-from datetime import datetime  # 新增导入
+import socket  # 新增导入
+from datetime import datetime
 
 def load_ssh_accounts(yaml_path):
     try:  # 添加异常处理
@@ -20,35 +21,32 @@ def ssh_login(hostname, port, username, password):
     
     try:
         print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 正在连接 {username}@{hostname}:{port}...")
-        client.connect(hostname, port=port, username=username, password=password)
+        client.connect(hostname, port=port, username=username, password=password, timeout=10)  # 添加超时参数
         print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {username}@{hostname} 登录成功！")
         
-        # 示例：执行简单命令
-        cmd = 'lsb_release -a || uname -a'
+        # 执行简单命令
+        cmd = 'uname -a'
         print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 正在执行命令: {cmd}")
-        stdin, stdout, stderr = client.exec_command(cmd)
+        _, stdout, stderr = client.exec_command(cmd)
         
         # 新增命令输出日志
-        output = stdout.read().decode()
-        errors = stderr.read().decode()
-        print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 命令输出:")
-        print(f"[stdout]\n{output}")
+        output = stdout.read().decode().strip()
+        errors = stderr.read().decode().strip()
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 命令输出: {output}")
         if errors:
-            print(f"[stderr]\n{errors}")
+            print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}]错误: {errors}")
             
     except paramiko.AuthenticationException:
-        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {username}@{hostname} 认证失败")
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {username}@{hostname} 认证失败，请检查用户名和密码是否正确")
     except paramiko.SSHException as e:
         print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {username}@{hostname} 连接失败: {str(e)}")
+    except socket.gaierror:
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {username}@{hostname} 主机名解析失败，请检查主机名是否正确")
+    except TimeoutError:
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {username}@{hostname} 连接超时，请检查网络连接或服务器状态")
     finally:
         client.close()
-        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 连接已关闭")
-
-# 在文件顶部添加datetime导入
-import os
-import paramiko
-import yaml
-from datetime import datetime  # 新增导入
+        print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 连接已关闭\n")  # 修正了这里的换行符
 
 if __name__ == "__main__":
     # 自动生成跨平台路径

@@ -13,7 +13,7 @@ COPY ssh_client.py .
 COPY ssh_accounts.yaml .
 
 # 安装Python依赖
-RUN pip install paramiko pyyaml
+RUN pip install paramiko pyyaml socket
 
 # 创建定时任务文件
 # 修改Cron任务（添加@reboot触发）
